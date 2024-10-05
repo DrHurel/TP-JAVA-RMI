@@ -1,0 +1,4 @@
+// rmi-project/settings.gradle
+rootProject.name = 'rmi-project'
+
+include 'common', 'server', 'client'

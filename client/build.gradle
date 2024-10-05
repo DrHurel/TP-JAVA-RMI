@@ -1,0 +1,12 @@
+// rmi-project/server/build.gradle
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':common')
+}
+
+application {
+    mainClass = 'rmi.client.RmiClient'
+}

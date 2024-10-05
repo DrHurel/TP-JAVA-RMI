@@ -1,0 +1,4 @@
+// rmi-project/common/build.gradle
+dependencies {
+    // No specific dependencies for common at this moment
+}
