@@ -10,3 +10,25 @@ dependencies {
 application {
     mainClass = 'rmi.client.RmiClient'
 }
+
+run {
+    standardInput = System.in
+    
+}
+
+
+tasks.named('run') {
+    // Set JVM arguments to include the security manager and policy file
+    jvmArgs = [
+        '-Djava.security.manager=allow', // Enable the security manager (deprecated in Java 17+)
+        '-Djava.security.policy=src/main/java/rmi/client/client.policy' // Specify the path to your policy file
+    ]
+}
+
+tasks.named('test') {
+    // Set JVM arguments to include the security manager and policy file
+    jvmArgs = [
+        '-Djava.security.manager=allow', // Enable the security manager (deprecated in Java 17+)
+        '-Djava.security.policy=src/main/java/rmi/client/client.policy' // Specify the path to your policy file
+    ]
+}

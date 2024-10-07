@@ -9,4 +9,16 @@ dependencies {
 
 application {
     mainClass = 'rmi.server.RmiServer'
+
 }
+
+tasks.named('run') {
+    // Set JVM arguments to include the security manager and policy file
+    jvmArgs = [
+        '-Djava.security.manager=allow', // Enable the security manager (deprecated in Java 17+)
+        '-Djava.security.policy=src/main/java/rmi/server/server.policy' // Specify the path to your policy file
+    ]
+}
+
+
+

@@ -1,0 +1,7 @@
+grant {
+    // Permission to connect to the RMI server
+    permission java.net.SocketPermission "localhost:1024-65535", "connect,resolve";
+
+    // Allow reading property 'java.rmi.server.codebase'
+    permission java.util.PropertyPermission "java.rmi.server.codebase", "read";
+};
