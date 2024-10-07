@@ -308,6 +308,11 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
         String name;
         try {
             name = scanner.nextLine();
+
+            if (currentCabinet != null) {
+                currentCabinet.unsubscribeNotification(uid);
+            }
+
             currentCabinet = (VeterinariesCabinet) registry.lookup(name);
             currentCabinet.subscribeNotification(uid, new RmiClient());
             logger.info("cabinet selected");
