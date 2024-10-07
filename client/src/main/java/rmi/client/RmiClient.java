@@ -1,5 +1,6 @@
 package rmi.client;
 
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -22,11 +23,12 @@ enum Command {
     ADD_CABINET("0"),
     REMOVE_CABINET("1"),
     GET_ANIMAL("2"),
-    GET_ANIMAL_ID_FROM_NAME("3"),
-    GET_ANIMAL_ID_FROM_SPECIE("4"),
-    SELECT_CABINET("5"),
-    ADD_PATIENT("6"),
-    REMOVE_PATIENT("7"),
+    UPDATE_CURRENT_PATIENT_FILE("3"),
+    GET_ANIMAL_ID_FROM_NAME("4"),
+    GET_ANIMAL_ID_FROM_SPECIE("5"),
+    SELECT_CABINET("6"),
+    ADD_PATIENT("7"),
+    REMOVE_PATIENT("8"),
     QUIT("!q"),
     DEFAULT("DEFAULT");
 
@@ -60,6 +62,8 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
     static Registry registry;
     static String uid;
 
+    static Animal currAnimal;
+
     public static void main(String[] args) {
 
         try {
@@ -70,7 +74,7 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
             server = (Server) registry.lookup("server");
             logger.info("server loaded");
             logger.info(String.format("Cabinet list : %s", String.join(", ", server.getCabinetList())));
-            System.out.println("Register id");
+            System.out.println("\n======== Register id ========");
             uid = scanner.nextLine();
             boolean getInput = true;
             while (getInput) {
@@ -88,15 +92,16 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
 
         // Reading data using readLine
 
-        System.out.println("chose an option :");
+        System.out.println("\n\n ========== chose an option ===========");
         System.out.println("ADD_CABINET : 0");
         System.out.println("REMOVE_CABINET : 1");
         System.out.println("GET_ANIMAL : 2");
-        System.out.println("GET_ANIMAL_ID_FROM_NAME : 3");
-        System.out.println("GET_ANIMAL_ID_FROM_SPECIE : 4");
-        System.out.println("SELECT_CABINET : 5");
-        System.out.println("ADD_PATIENT : 6");
-        System.out.println("REMOVE_PATIENT 7");
+        System.out.println("UPDATE_CURRENT_PATIENT_FILE : 3");
+        System.out.println("GET_ANIMAL_ID_FROM_NAME : 4");
+        System.out.println("GET_ANIMAL_ID_FROM_SPECIE : 5");
+        System.out.println("SELECT_CABINET : 6");
+        System.out.println("ADD_PATIENT : 7");
+        System.out.println("REMOVE_PATIENT 8");
         System.out.println("QUIT : !q");
 
         Command command = Command.fromString(scanner.nextLine());
@@ -112,6 +117,10 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
 
             case Command.GET_ANIMAL:
                 commandGetAnimal();
+                break;
+
+            case Command.UPDATE_CURRENT_PATIENT_FILE:
+                commandUpdatePatientFile();
                 break;
             case Command.GET_ANIMAL_ID_FROM_NAME:
                 commandGetAnimalFromName();
@@ -136,6 +145,42 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
 
         }
         return true;
+    }
+
+    private static void commandUpdatePatientFile() {
+        if (currAnimal == null) {
+            System.out.println("not patient selected");
+        }
+
+        try {
+            MedicalFile file = (MedicalFile) registry.lookup(currAnimal.getMEdicalFileID());
+            String field;
+
+            String value;
+            boolean edit = true;
+
+            while (edit) {
+                System.out.println(file.info());
+
+                System.out.println("");
+                System.out.println("Select a field to edit or leave with !q");
+
+                field = scanner.nextLine();
+
+                if (field.equals("!q")) {
+
+                    break;
+                }
+
+                System.out.println("Enter value to update field");
+                value = scanner.nextLine();
+
+                file.update(field, value);
+            }
+
+        } catch (RemoteException | NotBoundException e) {
+            logger.warning(e.getMessage());
+        }
     }
 
     private static void commandRemovePatient() {
@@ -225,8 +270,10 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
         try {
             name = scanner.nextLine();
 
-            Animal animal = (Animal) registry.lookup(name);
-            logger.info(animal.info());
+            currAnimal = (Animal) registry.lookup(name);
+            System.out.println("\nanimal selected\n");
+            System.out.println(currAnimal.info());
+            System.out.println("");
         } catch (Exception e) {
             logger.severe(e.getMessage());
         }
@@ -263,7 +310,9 @@ public class RmiClient extends UnicastRemoteObject implements ClientCallback {
             name = scanner.nextLine();
             currentCabinet = (VeterinariesCabinet) registry.lookup(name);
             currentCabinet.subscribeNotification(uid, new RmiClient());
+            logger.info("cabinet selected");
         } catch (Exception e) {
+            logger.info("fail to select cabinet");
             logger.severe(e.getMessage());
         }
     }
